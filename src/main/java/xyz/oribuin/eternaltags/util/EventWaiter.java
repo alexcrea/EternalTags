@@ -65,13 +65,20 @@ public class EventWaiter implements Listener {
 
 
         if (timeout > 0 && unit != null) {
-            EternalTags.getInstance().getServer().getScheduler().runTaskLater(EternalTags.getInstance(), () -> {
+            Runnable taskToDo = () -> {
                 if (set.remove(we) && timeoutAction != null) {
                     timeoutAction.run();
                     HandlerList.unregisterAll(this);
                 }
-
-            }, unit.toMillis(timeout));
+            };
+            
+            if (TagsUtils.isFolia()) {
+                Bukkit.getGlobalRegionScheduler().runDelayed(EternalTags.getInstance(),
+                        (task) -> taskToDo.run(), unit.toMillis(timeout));
+            }else{
+                EternalTags.getInstance().getServer().getScheduler().runTaskLater(EternalTags.getInstance(),
+                        taskToDo, unit.toMillis(timeout));
+            }
         }
     }
 
